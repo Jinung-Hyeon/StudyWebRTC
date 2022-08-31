@@ -1,6 +1,7 @@
 const socket = io();
 
 const myFace = document.getElementById("myFace");
+const peerFace = document.getElementById("peerFace");
 const muteBtn = document.getElementById("mute");
 const cameraBtn = document.getElementById("camera");
 const camerasSelect = document.getElementById("cameras");
@@ -13,6 +14,8 @@ let muted = false;
 let cameraOff = false;
 let roomName;
 let myPeerConnection;
+
+document.getElementById("myFace").volume = 0;
 
 async function getCameras() {
     try{
@@ -36,6 +39,7 @@ async function getCameras() {
 
 async function getMedia(deviceId) {
     const initialConstraints = {
+        
         audio: true,
         video: { facingMode: "user"},
     };
@@ -148,13 +152,19 @@ socket.on("ice", (ice) => {
     myPeerConnection.addIceCandidate(ice);
 });
 
+socket.on("goodbye", () => {
+    console.log("bye");
+    //peerFace.removeAttribute('src');
+    peerFace.remove();
+});
+
 // RTC Code
 
 function makeConnection(){
     myPeerConnection = new RTCPeerConnection({
-        iceServers: [
+        'iceServers': [
             {
-                urls: [
+                "urls": [
                     "stun:stun.l.google.com:19302",
                 ]
             },
@@ -173,6 +183,6 @@ function handleIce(data){
 }
 
 function handleAddStream(data){
-    const peerFace = document.getElementById("peerFace");
+    
     peerFace.srcObject = data.stream;
 }
